@@ -4,21 +4,11 @@ export default async function handler(req, res) {
   // 1️⃣ Tu autenticación Base64 (client_id:client_secret)
   const basicAuth = "Basic cFVOeXk4SWh5MkdHa2FyaE1hMXk0V1ExZHNjMkt6cW86cTNhbWNyenFBOVhGcTd4ZQ=="; // 👈 reemplaza con el valor generado
 
-  // 2️⃣ URLs
-  const tokenUrl = "https://api.se.com/token";
-  const productsUrl =
-    "https://api.se.com/v2/reference-data/product/product-catalog/products" +
-    "?supplierid=Schneider_CO&supplierid-type=specific" +
-    "&customerid=Emi%20Equipos_CO&customerid-type=specific" +
-    "&product-reference=NSYCCASTE" +
-    "&english-descriptions=false" +
-    "&data-filtering=all";
-
   try {
-    console.log("🚀 Step 1: Requesting OAuth2 token...");
+    console.log("📡 Step 1: Getting OAuth2 token...");
 
-    // 3️⃣ Obtener el token igual que en Postman
-    const tokenRes = await fetch(tokenUrl, {
+    // 1️⃣ Pedir token a Schneider
+    const tokenRes = await fetch("https://api.se.com/token", {
       method: "POST",
       headers: {
         Authorization: basicAuth,
@@ -27,25 +17,30 @@ export default async function handler(req, res) {
       body: "grant_type=client_credentials",
     });
 
-    const tokenText = await tokenRes.text();
-    console.log("🧾 Raw token response:", tokenText);
-
     if (!tokenRes.ok) {
-      return res.status(401).json({
-        error: "Failed to obtain token",
-        details: tokenText,
-      });
+      const errorText = await tokenRes.text();
+      console.error("❌ Token request failed:", errorText);
+      return res.status(500).json({ error: "Failed to get token", details: errorText });
     }
 
-    const tokenData = JSON.parse(tokenText);
+    const tokenData = await tokenRes.json();
     const accessToken = tokenData.access_token;
-
     console.log("✅ Step 2: Got token:", accessToken);
 
-    // 4️⃣ Llamar al endpoint de productos con ese token
-    console.log("📦 Step 3: Fetching products...");
+    // 2️⃣ Hacer GET del producto (igual que en Postman)
+    const apiUrl =
+      "https://api.se.com/v2/reference-data/product/product-catalog/products" +
+      "?supplierid=Schneider_CO" +
+      "&supplierid-type=specific" +
+      "&customerid=Emi%20Equipos_CO" +
+      "&customerid-type=specific" +
+      "&date-of-reference=2021-12-01" +
+      "&change-type=all" +
+      "&product-reference=NSYCCASTE" +
+      "&english-descriptions=false" +
+      "&data-filtering=all";
 
-    const productRes = await fetch(productsUrl, {
+    const productsRes = await fetch(apiUrl, {
       method: "GET",
       headers: {
         Accept: "application/json",
@@ -55,20 +50,17 @@ export default async function handler(req, res) {
       },
     });
 
-    const productText = await productRes.text();
-    console.log("🧾 Raw products response:", productText);
+    const text = await productsRes.text();
+    console.log("🧾 Raw products response:", text);
 
-    if (!productRes.ok) {
-      return res.status(productRes.status).json({
-        error: "Failed to get products",
-        details: productText,
-      });
+    if (!productsRes.ok) {
+      return res.status(500).json({ error: "Failed to get products", details: text });
     }
 
-    const data = JSON.parse(productText);
-    return res.status(200).json(data);
+    const productsData = JSON.parse(text);
+    return res.status(200).json(productsData);
   } catch (err) {
-    console.error("💥 Unexpected error:", err);
-    return res.status(500).json({ error: err.message });
+    console.error("💥 Error:", err);
+    return res.status(500).json({ error: "Internal Server Error", details: err.message });
   }
 }
