@@ -8,7 +8,7 @@ export default async function handler(req, res) {
       method: "POST",
       headers: {
         Authorization:
-          "Basic N3hFQTd2NGdFTVpybDVmNkFwRjg0NXJEY1lBc0V4NDRkMVk3TndUazFVM1JEVU9xOkZJN0RaUnFyR0FCTjhrNDIzV1ZRR3hTZ2s0bWEyU0Zabll4QlJVWWRjcDZUbW9sV1ZYeHgzNnhqYmxxRkFvNmY=",
+          "Basic cFVOeXk4SWh5MkdHa2FyaE1hMXk0V1ExZHNjMkt6cW86cTNhbWNyenFBOVhGcTd4ZQ==",
         "Content-Type": "application/x-www-form-urlencoded",
       },
       body: new URLSearchParams({ grant_type: "client_credentials" }),
