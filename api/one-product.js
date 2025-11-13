@@ -1,7 +1,7 @@
 // api/products.js
 export default async function handler(req, res) {
   // Permitir solo el dominio de Shopify (CORS seguro)
-  res.setHeader("Access-Control-Allow-Origin", "https://emi-ve.com/");
+  res.setHeader("Access-Control-Allow-Origin", "https://emi-ve.com");
   res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
 
